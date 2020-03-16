@@ -3,13 +3,13 @@ package capter3
 import "fmt"
 
 func ExampleHasConsonantSuffixHangul() {
-	fmt.Println(HasConsonantSuffixHangul("위"))
-	fmt.Println(HasConsonantSuffixHangul("컴"))
-	fmt.Println(HasConsonantSuffixHangul("안"))
+	fmt.Println(HasConsonantSuffixHangul("사과"))
+	fmt.Println(HasConsonantSuffixHangul("수박"))
+	fmt.Println(HasConsonantSuffixHangul("바나나"))
 	// Output:
 	// false
 	// true
-	// true
+	// false
 }
 
 func Example_printBytes() {
@@ -26,4 +26,5 @@ func Example_printBytes() {
 	// 152
 	// 235
 	// 139
+	// 164
 }

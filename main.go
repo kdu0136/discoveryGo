@@ -3,9 +3,14 @@ package main
 import (
 	"fmt"
 	"github.com/discoveryGo/capter3"
+	"strings"
 )
 
 func main() {
-	capter3.Calculator(" -  11+1*3*(23+8/2)")
-	fmt.Println( -  11+1*3*(23+8/2))
+	r := strings.NewReader("hello\nhi")
+	m := NewMultiset()
+	if err := capter3.ReadFrom(r, BindMap(Insert, m)); err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(m)
 }
