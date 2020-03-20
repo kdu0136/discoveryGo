@@ -1,57 +1,18 @@
 package main
 
 import (
-	"fmt"
-	"github.com/discoveryGo/capter3"
+	"github.com/discoveryGo/capter4"
+	"strings"
 )
 
 func main() {
-	eval := capter3.NewEvaluator(map[string]capter3.BinOp{
-		"**": func(a, b int) int {
-			fmt.Println("**")
-			if a == 1 {
-				return 1
-			}
-			if b < 0 {
-				return 0
-			}
-			r := 1
-			for i := 0; i < b; i++ {
-				r *= a
-			}
-			return r
-		},
-		"*": func(a, b int) int {
-			fmt.Println("*")
-			return a * b
-		},
-		"/": func(a, b int) int {
-			fmt.Println("/")
-			return a / b
-		},
-		"mod": func(a, b int) int {
-			fmt.Println("%")
-			return a % b
-		},
-		"+": func(a, b int) int {
-			fmt.Println("+")
-			return a + b
-		},
-		"-": func(a, b int) int {
-			fmt.Println("-")
-			return a - b
-		},
-	}, capter3.PrecMap{
-		"**":  capter3.NewStrset(),
-		"*":   capter3.NewStrset("**", "*", "/", "mod"),
-		"/":   capter3.NewStrset("**", "*", "/", "mod"),
-		"mod": capter3.NewStrset("**", "*", "/", "mod"),
-		"+":   capter3.NewStrset("**", "*", "/", "mod", "+", "-"),
-		"-":   capter3.NewStrset("**", "*", "/", "mod", "+", "-"),
-	})
+	in := strings.Join([]string{
+		"다들 그 동안 고생이 많았다.",
+		"첫째는 분당에 있는 { 2 ** 4 * 3 }평 아파트를 갖거라.",
+		"둘째는 임야 { 10 ** 5 mod 7777 }평을 가져라.",
+		"막내는 { 10000 - ( 10 ** 5 mod 7777 ) }평 임야를 갖고",
+		"배기랑 { 711 * 8 / 9 }cc의 경운기를 갖거라",
+	}, "\n")
 
-	expr := "3 * ( ( 3 + 1 ) * 3 ) / ( -2 ) ** 3"
-	fmt.Println(expr)
-	result := eval(expr)
-	fmt.Println(result)
+	capter4.EvalReplaceAll(in)
 }

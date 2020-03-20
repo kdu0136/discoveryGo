@@ -1,4 +1,4 @@
-package capter3
+package capter4
 
 import (
 	"bufio"
@@ -34,9 +34,11 @@ func CreateFile(fileName string) error {
 	return nil
 }
 
-func WriteTo(w io.Writer, lines []string) error {
-	for _, line := range lines {
-		if _, err := fmt.Fprintln(w, line); err != nil {
+type Line []string
+
+func (line Line) WriteTo(w io.Writer) error {
+	for _, l := range line {
+		if _, err := fmt.Fprintln(w, l); err != nil {
 			return err
 		}
 	}

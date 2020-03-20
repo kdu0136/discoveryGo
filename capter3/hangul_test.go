@@ -14,7 +14,7 @@ func ExampleHasConsonantSuffixHangul() {
 
 func Example_printBytes() {
 	s := "가나다"
-	for i:=0; i < len(s); i++ {
+	for i := 0; i < len(s); i++ {
 		fmt.Println(s[i])
 	}
 	// Output:

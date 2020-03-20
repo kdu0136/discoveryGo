@@ -1,8 +1,9 @@
-package capter3
+package capter4
 
 import (
 	"fmt"
 	"math"
+	"strings"
 )
 
 func NewIntGenerator() func() int {
@@ -26,6 +27,28 @@ func BinOpToBInSub(f BinOp) BinSub {
 }
 
 type MultiSet map[string]int
+
+func (m MultiSet) Insert(val string) {
+	m[val]++
+}
+func (m MultiSet) Erase(val string) {
+	if m[val] <= 1 {
+		delete(m, val)
+	} else {
+		m[val]--
+	}
+}
+func (m MultiSet) Count(val string) int {
+	return m[val]
+}
+func (m MultiSet) String() string {
+	s := "{"
+	for val, count := range m {
+		s += strings.Repeat(val+" ", count)
+	}
+	return s + "}"
+}
+
 type SetOp func(m MultiSet, val string)
 
 func NewMultiset() MultiSet {
@@ -42,6 +65,7 @@ func BindMap(f SetOp, m MultiSet) func(val string) {
 
 // Func y = f(x). 실수값을 하나 받아서 실수값 하나를 돌려줌
 type Func func(float64) float64
+
 // Transform Func를 받아서 Func를 돌려주는 함수. 함수 하나를 다른 함수로 변환하는 함수의 형태
 type Transform func(Func) Func
 
@@ -109,4 +133,10 @@ func Sqrt(x float64) float64 {
 	return FixedPointOfTransform(func(y float64) float64 {
 		return Square(y) - x
 	}, NewtonTransform, 1.0)
+}
+
+type VertexID int
+
+func (id VertexID) String() string {
+	return fmt.Sprintf("VertexID(%d)", id)
 }
