@@ -61,4 +61,3 @@ func ExampleMultiSet() {
 	// 0
 	// {b c }
 }
-

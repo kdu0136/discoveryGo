@@ -49,7 +49,7 @@ func NewEvaluator() func(expr string) (int, error) {
 		"+":   NewStrset("**", "*", "/", "mod", "+", "-"),
 		"-":   NewStrset("**", "*", "/", "mod", "+", "-"),
 	}
-	return func(expr string)  (int, error) {
+	return func(expr string) (int, error) {
 		return Eval(opMap, prec, expr)
 	}
 }

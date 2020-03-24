@@ -5,7 +5,7 @@ import "testing"
 func TestFib(t *testing.T) {
 	cases := []struct {
 		in, want int
-	} {
+	}{
 		{0, 0},
 		{5, 5},
 		{6, 8},
@@ -19,12 +19,14 @@ func TestFib(t *testing.T) {
 }
 
 var DP []int
+
 // Fibonacci function
 func DPFunc(n int, f func(n int) int) int {
 	DP = make([]int, n+1)
 	f(n)
 	return DP[n]
 }
+
 // Fibonacci function
 func Fibonacci(n int) int {
 	if n == 0 {

@@ -13,6 +13,7 @@ const (
 	TODO
 	DONE
 )
+
 func (s status) String() string {
 	switch s {
 	case UNKNOWN:
@@ -48,9 +49,11 @@ func (d *Deadline) UnmarshalJSON(data []byte) error {
 }
 
 type Task struct {
-	Title    string
-	Status   status
-	Deadline *Deadline `json:",string"`
+	Title    string    `json:"title,omitempty"`
+	Status   status    `json:"status,omitempty"`
+	Deadline *Deadline `json:"deadline,omitempty"`
+	Priority int       `json:"priority,omitempty"`
+	SubTasks []Task    `json:"subTasks,omitempty"`
 }
 
 // OverDue returns true if the deadline is before the current time.
@@ -97,4 +100,9 @@ func (s *status) UnmarshalJSON(data []byte) error {
 		return errors.New("status.UnmarshalJSON: unknown value")
 	}
 	return nil
+}
+
+type Fields struct {
+	VisibleField   string `json:"visibleField"`
+	InvisibleField string `json:"invisibleField"`
 }

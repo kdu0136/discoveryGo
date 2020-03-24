@@ -8,6 +8,7 @@ import (
 )
 
 var rx = regexp.MustCompile(`{[^}]+}`)
+
 func EvalReplaceAll(in string) {
 	eval := NewEvaluator()
 	replacer := strings.NewReplacer("{", "", "}", "")
