@@ -85,3 +85,20 @@ func ExampleCaseInsensitive_heap() {
 	// iPhone
 	// MacBook
 }
+
+func ExampleCaseInsensitive_heapString() {
+	apple := CaseInsensitive([]string{
+		"iPhone", "iPad", "MacBook", "AppStore",
+	})
+	heap.Init(&apple)
+	for apple.Len() > 0 {
+		popped := heap.Pop(&apple)
+		s := popped.(string)
+		fmt.Println(s)
+	}
+	// Output:
+	// AppStore
+	// iPad
+	// iPhone
+	// MacBook
+}

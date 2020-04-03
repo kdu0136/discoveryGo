@@ -66,11 +66,12 @@ func (t Task) OverDue() bool {
 	return t.Deadline.OverDue()
 }
 
+type StructID int64
 type MyStruct struct {
-	Title    string `json:"title"`
-	Internal string `json:"-"`          // json 무시
-	Value    int64  `json:",omitempty"` // 0일경우 무시
-	ID       int64  `json:",string"`    // json 에서 문자
+	Title    string   `json:"title"`
+	Internal string   `json:"-"`          // json 무시
+	Value    int64    `json:",omitempty"` // 0일경우 무시
+	ID       StructID `json:"id"`         // json 에서 문자
 }
 
 // MarshalJON implements the json.Marshaler interface

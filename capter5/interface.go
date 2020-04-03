@@ -3,6 +3,8 @@ package capter5
 import (
 	"fmt"
 	"io"
+	"os"
+	"strconv"
 	"strings"
 )
 
@@ -59,4 +61,40 @@ func (c *CaseInsensitive) Pop() interface{} {
 	last := (*c)[cLen-1]
 	*c = (*c)[:cLen-1]
 	return last
+}
+
+type FileSystem interface {
+	Rename(oldpath, newpath string) error
+	Remove(name string) error
+}
+
+type OSFileSystem struct{}
+
+func (fs OSFileSystem) Rename(oldpath, newpath string) error {
+	return os.Rename(oldpath, newpath)
+}
+
+func (fs OSFileSystem) Remove(name string) error {
+	return os.Remove(name)
+}
+
+func ManageFiles(fs FileSystem) {
+}
+
+func Join(sep string, a ...interface{}) string {
+	if len(a) == 0 {
+		return ""
+	}
+	t := make([]string, len(a))
+	for i := range t {
+		switch x := a[i].(type) {
+		case string:
+			t[i] = x
+		case int:
+			t[i] = strconv.Itoa(x)
+		case fmt.Stringer:
+			t[i] = x.String()
+		}
+	}
+	return strings.Join(t, sep)
 }

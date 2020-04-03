@@ -58,7 +58,7 @@ func Example_marshalJSON() {
 	fmt.Println(string(b2))
 	// Output:
 	// {"title":"Laundry","status":"DONE","deadline":1439739780}
-	// {"title":"my title","Value":123,"ID":"1234"}
+	// {"title":"my title","Value":123,"id":1234}
 }
 
 func Example_unmarshalJSON() {
