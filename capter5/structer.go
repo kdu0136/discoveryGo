@@ -2,6 +2,7 @@ package capter5
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -76,16 +77,11 @@ type MyStruct struct {
 
 // MarshalJON implements the json.Marshaler interface
 func (s status) MarshalJSON() ([]byte, error) {
-	switch s {
-	case UNKNOWN:
-		return []byte(`"UNKNOWN"`), nil
-	case TODO:
-		return []byte(`"TODO"`), nil
-	case DONE:
-		return []byte(`"DONE"`), nil
-	default:
+	str := s.String()
+	if str == "" {
 		return nil, errors.New("status.MarshalJSON: unknown value")
 	}
+	return []byte(fmt.Sprintf("\"%s\"", str)), nil
 }
 
 // UnmarshalJSON implements the json.Unmarshaler interface

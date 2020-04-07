@@ -5,6 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/discoveryGo/capter5"
+	"html/template"
+	"log"
+	"net/http"
 )
 
 // ID is data type to identify a task
@@ -111,4 +114,142 @@ type Response struct {
 	ID    ID            `json:"id,omitempty"`
 	Task  capter5.Task  `json:"task"`
 	Error ResponseError `json:"error"`
+}
+
+// FIXME: m is NOT thread-safe
+var m = NewMemoryDataAccess()
+
+const PathPrefix = "/api/v1/task/"
+
+func ApiHandler(w http.ResponseWriter, r *http.Request) {
+	getID := func() (ID, error) {
+		id := ID(r.URL.Path[len(PathPrefix):])
+		if id == "" {
+			return id, errors.New("apiHandler: ID is empty")
+		}
+		return id, nil
+	}
+
+	getTasks := func() ([]capter5.Task, error) {
+		var result []capter5.Task
+		if err := r.ParseForm(); err != nil {
+			return nil, err
+		}
+		encodedTasks, ok := r.PostForm["task"]
+		if !ok {
+			return nil, errors.New("task parameter expected")
+		}
+		for _, encodedTask := range encodedTasks {
+			result = append(result, capter5.Task{
+				Title: encodedTask,
+			})
+		}
+		return result, nil
+	}
+
+	switch r.Method {
+	case "GET":
+		id, err := getID()
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		t, err := m.Get(id)
+		err = json.NewEncoder(w).Encode(Response{
+			ID:    id,
+			Task:  t,
+			Error: ResponseError{Err: err},
+		})
+		if err != nil {
+			log.Println(err)
+		}
+	case "PUT":
+		id, err := getID()
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		tasks, err := getTasks()
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		for _, t := range tasks {
+			err = m.Put(id, t)
+			err = json.NewEncoder(w).Encode(Response{
+				ID:    id,
+				Task:  t,
+				Error: ResponseError{Err: err},
+			})
+			if err != nil {
+				log.Println(err)
+				return
+			}
+		}
+	case "POST":
+		tasks, err := getTasks()
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		for _, t := range tasks {
+			id, err := m.Post(t)
+			err = json.NewEncoder(w).Encode(Response{
+				ID:    id,
+				Task:  t,
+				Error: ResponseError{Err: err},
+			})
+			if err != nil {
+				log.Println(err)
+				return
+			}
+		}
+	case "DELETE":
+		id, err := getID()
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		err = m.Delete(id)
+		err = json.NewEncoder(w).Encode(Response{
+			ID:    id,
+			Error: ResponseError{Err: err},
+		})
+		if err != nil {
+			log.Println(err)
+		}
+	}
+}
+
+const HtmlPrefix = "/task/"
+
+var tmpl = template.Must(template.ParseGlob("html/*.html"))
+
+func HtmlHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		log.Println(r.Method, "method is not supported")
+		return
+	}
+	getID := func() (ID, error) {
+		id := ID(r.URL.Path[len(HtmlPrefix):])
+		if id == "" {
+			return id, errors.New("htmlHandler: ID is empty")
+		}
+		return id, nil
+	}
+	id, err := getID()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	t, err := m.Get(id)
+	err = tmpl.ExecuteTemplate(w, "task.html", &Response{
+		ID:    id,
+		Task:  t,
+		Error: ResponseError{err},
+	})
+	if err != nil {
+		log.Println(err)
+		return
+	}
 }
