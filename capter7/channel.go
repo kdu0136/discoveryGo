@@ -3,35 +3,65 @@ package capter7
 import (
 	"context"
 	"fmt"
-	"runtime"
 	"sync"
 	"time"
 )
 
 func ChannelMain() {
-	c := make(chan int)
-	go func() {
-		defer close(c)
-		for i := 3; i < 103; i += 10 {
-			c <- i
-		}
-	}()
+	max := 100
 	ctx, cancel := context.WithCancel(context.Background())
-	nums := PlusOne(ctx, PlusOne(ctx, PlusOne(ctx, PlusOne(ctx, PlusOne(ctx, c)))))
-	for num := range nums {
-		fmt.Println(num)
-		if num >= 18 {
-			cancel()
+	defer cancel()
+	for prime := range Primes(ctx) {
+		if prime > max {
 			break
 		}
+		fmt.Print(prime, " ")
 	}
-	time.Sleep(100 * time.Millisecond)
-	fmt.Println("NumGoroutine:", runtime.NumGoroutine())
-	for _ = range nums {
-		// Consume all nums
-	}
-	time.Sleep(100 * time.Millisecond)
-	fmt.Println("NumGoroutine:", runtime.NumGoroutine())
+	fmt.Println()
+	//reqs := make(chan Request)
+	//defer close(reqs)
+	//for i := 0; i < 3; i++ {
+	//	go PlusOneService(reqs, i)
+	//}
+	//var wg sync.WaitGroup
+	//for i := 3; i < 53; i += 10 {
+	//	wg.Add(1)
+	//	go func(i int) {
+	//		defer wg.Done()
+	//		resps := make(chan Response)
+	//		reqs <- Request{i, resps}
+	//		//fmt.Println(i, "=>", <-resps)
+	//		for resp := range resps {
+	//			fmt.Println(i, "=>", resp)
+	//		}
+	//	}(i)
+	//}
+	//wg.Wait()
+
+	//c := make(chan int)
+	//go func() {
+	//	defer close(c)
+	//	for i := 3; i < 103; i += 10 {
+	//		c <- i
+	//	}
+	//}()
+	//ctx, cancel := context.WithCancel(context.Background())
+	//nums := PlusOne(ctx, PlusOne(ctx, PlusOne(ctx, PlusOne(ctx, PlusOne(ctx, c)))))
+	//for num := range nums {
+	//	fmt.Println(num)
+	//	if num >= 18 {
+	//		cancel()
+	//		break
+	//	}
+	//}
+	//time.Sleep(100 * time.Millisecond)
+	//fmt.Println("NumGoroutine:", runtime.NumGoroutine())
+	//for _ = range nums {
+	//	// Consume all nums
+	//}
+	//time.Sleep(100 * time.Millisecond)
+	//fmt.Println("NumGoroutine:", runtime.NumGoroutine())
+
 	//c1, c2, c3 := make(chan int), make(chan int), make(chan int)
 	//sendInts := func(c chan<-int, begin, end int) {
 	//	defer close(c)
@@ -181,6 +211,88 @@ func FanIn3(in1, in2, in3 <-chan int) <-chan int {
 				}
 			case <-timeout:
 				fmt.Println("time out")
+				return
+			}
+		}
+	}()
+	return out
+}
+
+type Request struct {
+	Num  int
+	Resp chan Response
+}
+
+type Response struct {
+	Num      int
+	WorkerID int
+}
+
+func PlusOneService(reqs <-chan Request, workerID int) {
+	for req := range reqs {
+		go func(req Request) {
+			defer close(req.Resp)
+			req.Resp <- Response{req.Num + 1, workerID}
+		}(req)
+	}
+}
+
+// Range returns a channel and sends ints
+// (start, start+step, start+2*step, ...).
+func Range(ctx context.Context, start, step int) <-chan int {
+	out := make(chan int)
+	go func() {
+		defer close(out)
+		for i := start; ; i += step {
+			select {
+			case out <- i:
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+	return out
+}
+
+type IntPipe2 func(context.Context, <-chan int) <-chan int
+
+// FilterMultiple returns a IntPipe the filters multiple of n.
+func FilterMultiple(n int) IntPipe2 {
+	return func(ctx context.Context, in <-chan int) <-chan int {
+		out := make(chan int)
+		go func() {
+			defer close(out)
+			for x := range in {
+				if x%n == 0 {
+					continue
+				}
+				select {
+				case out <- x:
+				case <-ctx.Done():
+					return
+				}
+			}
+		}()
+		return out
+	}
+}
+
+// Primes returns prime number until context done.
+func Primes(ctx context.Context) <-chan int {
+	out := make(chan int)
+	go func() {
+		defer close(out)
+		c := Range(ctx, 2, 1)
+		for {
+			select {
+			case i := <-c:
+				c = FilterMultiple(i)(ctx, c)
+				select {
+				case out <- i:
+				case <-ctx.Done():
+					return
+				}
+			case <-ctx.Done():
 				return
 			}
 		}
