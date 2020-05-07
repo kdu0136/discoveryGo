@@ -1,7 +1,9 @@
 package main
 
-import "github.com/discoveryGo/capter7"
+import (
+	"github.com/discoveryGo/capter8"
+)
 
 func main() {
-	capter7.RaceMain()
+	capter8.PatternMain()
 }
